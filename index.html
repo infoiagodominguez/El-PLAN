@@ -1,0 +1,545 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0f1e;
+    --surface: #0f1629;
+    --surface2: #141d35;
+    --surface3: #1a2540;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #f0f4ff;
+    --text2: #8896b3;
+    --text3: #5a6a8a;
+    --green: #00e5a0;
+    --green2: #00b87a;
+    --green-bg: rgba(0,229,160,0.1);
+    --red: #ff5c7a;
+    --red-bg: rgba(255,92,122,0.1);
+    --blue: #4f8aff;
+    --blue2: #3a6fd8;
+    --blue-bg: rgba(79,138,255,0.1);
+    --violet: #a78bfa;
+    --violet-bg: rgba(167,139,250,0.1);
+    --amber: #f5a623;
+    --amber-bg: rgba(245,166,35,0.1);
+  }
+
+  body { background: var(--bg); font-family: 'SF Pro Display', -apple-system, 'Segoe UI', sans-serif; color: var(--text); font-size: 14px; }
+
+  .app { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
+
+  /* NAV */
+  .nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  .nav-logo { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; }
+  .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .nav-tabs { display: flex; gap: 4px; background: var(--surface); border-radius: 10px; padding: 4px; border: 0.5px solid var(--border); }
+  .tab { padding: 7px 16px; border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--text2); cursor: pointer; transition: all 0.2s; border: none; background: transparent; }
+  .tab.active { background: var(--surface3); color: var(--text); }
+  .tab:hover:not(.active) { color: var(--text); }
+  .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--violet)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+  /* SECTION */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* KPI GRID */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  @media (max-width: 700px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .kpi-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 18px; position: relative; overflow: hidden; cursor: default; transition: border-color 0.2s; }
+  .kpi-card:hover { border-color: var(--border2); }
+  .kpi-card::before { content: ''; position: absolute; top: 0; right: 0; width: 80px; height: 80px; border-radius: 50%; opacity: 0.06; transform: translate(20px, -20px); }
+  .kpi-card.patrimonio::before { background: var(--blue); }
+  .kpi-card.ingresos::before { background: var(--green); }
+  .kpi-card.gastos::before { background: var(--red); }
+  .kpi-card.ahorro::before { background: var(--violet); }
+
+  .kpi-label { font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+  .kpi-value { font-size: 26px; font-weight: 700; letter-spacing: -0.8px; margin-bottom: 8px; }
+  .kpi-value.blue { color: var(--blue); }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.red { color: var(--red); }
+  .kpi-value.violet { color: var(--violet); }
+  .kpi-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
+  .kpi-badge.up { background: var(--green-bg); color: var(--green); }
+  .kpi-badge.down { background: var(--red-bg); color: var(--red); }
+
+  .savings-bar { margin-top: 8px; height: 6px; background: rgba(167,139,250,0.15); border-radius: 10px; overflow: hidden; }
+  .savings-fill { height: 100%; background: var(--violet); border-radius: 10px; transition: width 1s ease; }
+
+  /* CHARTS ROW */
+  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 20px; }
+  @media (max-width: 700px) { .charts-row { grid-template-columns: 1fr; } }
+
+  .chart-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 20px; }
+  .chart-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .chart-sub { font-size: 12px; color: var(--text3); margin-bottom: 16px; }
+
+  /* LEGEND */
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+  /* NET WORTH MODULE */
+  .nw-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .nw-total { font-size: 36px; font-weight: 700; letter-spacing: -1px; color: var(--blue); }
+  .nw-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  @media (max-width: 600px) { .nw-cols { grid-template-columns: 1fr; } }
+  .nw-col-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 0.5px solid var(--border); }
+  .nw-col-title.activos { color: var(--green); }
+  .nw-col-title.pasivos { color: var(--red); }
+  .nw-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--surface2); border-radius: 10px; margin-bottom: 8px; transition: background 0.2s; cursor: pointer; border: 0.5px solid var(--border); }
+  .nw-item:hover { background: var(--surface3); }
+  .nw-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .nw-icon.green { background: var(--green-bg); }
+  .nw-icon.blue { background: var(--blue-bg); }
+  .nw-icon.violet { background: var(--violet-bg); }
+  .nw-icon.amber { background: var(--amber-bg); }
+  .nw-icon.red { background: var(--red-bg); }
+  .nw-name { font-size: 13px; font-weight: 500; }
+  .nw-desc { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .nw-amount { margin-left: auto; text-align: right; }
+  .nw-amount .val { font-size: 14px; font-weight: 600; }
+  .nw-amount .val.neg { color: var(--red); }
+  .nw-amount .val.pos { color: var(--text); }
+
+  /* CASHFLOW */
+  .cf-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .cf-pill { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 0.5px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; transition: all 0.2s; }
+  .cf-pill.active { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+
+  .movements { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .mov-header { display: grid; grid-template-columns: 36px 1fr 100px 100px; gap: 12px; padding: 10px 16px; border-bottom: 0.5px solid var(--border); font-size: 11px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.6px; }
+  .mov-row { display: grid; grid-template-columns: 36px 1fr 100px 100px; gap: 12px; padding: 12px 16px; border-bottom: 0.5px solid var(--border); align-items: center; transition: background 0.15s; cursor: pointer; }
+  .mov-row:last-child { border-bottom: none; }
+  .mov-row:hover { background: var(--surface2); }
+  .mov-cat-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .mov-name { font-size: 13px; font-weight: 500; }
+  .mov-date { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .mov-account { font-size: 12px; color: var(--text2); }
+  .mov-amount { font-size: 14px; font-weight: 700; text-align: right; }
+  .mov-amount.in { color: var(--green); }
+  .mov-amount.out { color: var(--text); }
+
+  /* FAB */
+  .fab { position: fixed; bottom: 28px; right: 28px; width: 52px; height: 52px; border-radius: 50%; background: var(--blue); border: none; color: white; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s, background 0.2s; z-index: 100; }
+  .fab:hover { transform: scale(1.08); background: var(--blue2); }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 0.5px solid var(--border2); border-radius: 18px; padding: 24px; width: 380px; max-width: 95vw; }
+  .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+  .modal-field { margin-bottom: 14px; }
+  .modal-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .modal-input { width: 100%; background: var(--surface2); border: 0.5px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s; }
+  .modal-input:focus { border-color: var(--blue); }
+  .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .type-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .type-btn { padding: 10px; border-radius: 8px; border: 0.5px solid var(--border); background: transparent; color: var(--text2); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+  .type-btn.ingreso.sel { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+  .type-btn.gasto.sel { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .btn-cancel { flex: 1; padding: 11px; border-radius: 9px; border: 0.5px solid var(--border); background: transparent; color: var(--text2); font-size: 14px; cursor: pointer; }
+  .btn-save { flex: 2; padding: 11px; border-radius: 9px; border: none; background: var(--blue); color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .btn-save:hover { background: var(--blue2); }
+
+  select.modal-input option { background: #1a2540; }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .kpi-card { animation: fadeUp 0.4s ease both; }
+  .kpi-card:nth-child(1) { animation-delay: 0.05s; }
+  .kpi-card:nth-child(2) { animation-delay: 0.1s; }
+  .kpi-card:nth-child(3) { animation-delay: 0.15s; }
+  .kpi-card:nth-child(4) { animation-delay: 0.2s; }
+</style>
+
+<h2 class="sr-only">Panel de gestión de patrimonio neto con KPIs, gráficos de evolución y módulos de activos/pasivos y flujo de caja.</h2>
+
+<div class="app">
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-logo"><div class="logo-dot"></div> WealthOS</div>
+    <div class="nav-tabs">
+      <button class="tab active" onclick="showSection('dashboard', this)">Dashboard</button>
+      <button class="tab" onclick="showSection('networth', this)">Patrimonio</button>
+      <button class="tab" onclick="showSection('cashflow', this)">Cash Flow</button>
+    </div>
+    <div class="nav-avatar">IG</div>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <div id="sec-dashboard" class="section active">
+    <div class="kpi-grid">
+      <div class="kpi-card patrimonio">
+        <div class="kpi-label">Patrimonio Total</div>
+        <div class="kpi-value blue" id="kpi-patrimonio">€48.250</div>
+        <span class="kpi-badge up">▲ +6,2%</span>
+      </div>
+      <div class="kpi-card ingresos">
+        <div class="kpi-label">Ingresos del Mes</div>
+        <div class="kpi-value green">€1.980</div>
+        <span class="kpi-badge up">▲ +2,1%</span>
+      </div>
+      <div class="kpi-card gastos">
+        <div class="kpi-label">Gastos del Mes</div>
+        <div class="kpi-value red">€1.143</div>
+        <span class="kpi-badge down">▼ −3,4%</span>
+      </div>
+      <div class="kpi-card ahorro">
+        <div class="kpi-label">Tasa de Ahorro</div>
+        <div class="kpi-value violet">42%</div>
+        <div class="savings-bar"><div class="savings-fill" style="width:42%"></div></div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Evolución del Patrimonio</div>
+        <div class="chart-sub">Últimos 12 meses · Área interactiva</div>
+        <div style="position: relative; width: 100%; height: 200px;">
+          <canvas id="areaChart" role="img" aria-label="Gráfico de área del patrimonio de los últimos 12 meses, creciendo de 32.000€ a 48.250€">Patrimonio creció de 32.000€ a 48.250€ en 12 meses.</canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Asset Allocation</div>
+        <div class="chart-sub">Distribución actual</div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#4f8aff"></span>Fondos 52%</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#00e5a0"></span>Efectivo 28%</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#a78bfa"></span>Cripto 12%</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#f5a623"></span>Pensión 8%</span>
+        </div>
+        <div style="position: relative; width: 100%; height: 160px;">
+          <canvas id="donutChart" role="img" aria-label="Donut chart de asset allocation: Fondos 52%, Efectivo 28%, Cripto 12%, Pensión 8%">Fondos 52%, Efectivo 28%, Cripto 12%, Pensión 8%.</canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:0">
+      <div class="chart-title">Ingresos vs Gastos</div>
+      <div class="chart-sub">Comparativa mensual 2024–2025</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#00e5a0"></span>Ingresos</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#ff5c7a"></span>Gastos</span>
+      </div>
+      <div style="position: relative; width: 100%; height: 180px;">
+        <canvas id="barChart" role="img" aria-label="Gráfico de barras comparativo de ingresos y gastos por mes">Ingresos mensuales entre 1.700 y 2.100€. Gastos entre 900 y 1.400€.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- NET WORTH -->
+  <div id="sec-networth" class="section">
+    <div class="nw-header">
+      <div>
+        <div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px">Patrimonio Neto</div>
+        <div class="nw-total" id="nw-display">€48.250</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:12px;color:var(--text3)">Activos <span style="color:var(--green);font-weight:600">€52.350</span></div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px">Pasivos <span style="color:var(--red);font-weight:600">€4.100</span></div>
+      </div>
+    </div>
+    <div class="nw-cols">
+      <div>
+        <div class="nw-col-title activos">Activos</div>
+        <div class="nw-item" onclick="editItem(this, 13400)">
+          <div class="nw-icon green">🏦</div>
+          <div><div class="nw-name">Abanca Cuenta Corriente</div><div class="nw-desc">Saldo disponible</div></div>
+          <div class="nw-amount"><div class="val pos" id="nw-abanca">€13.400</div></div>
+        </div>
+        <div class="nw-item" onclick="editItem(this, 22100)">
+          <div class="nw-icon blue">📈</div>
+          <div><div class="nw-name">Cartera de Fondos</div><div class="nw-desc">Amundi, Fundsmith, Polar…</div></div>
+          <div class="nw-amount"><div class="val pos" id="nw-fondos">€22.100</div></div>
+        </div>
+        <div class="nw-item" onclick="editItem(this, 5800)">
+          <div class="nw-icon violet">🔮</div>
+          <div><div class="nw-name">Cripto (BTC/ETH)</div><div class="nw-desc">Binance · Mercado spot</div></div>
+          <div class="nw-amount"><div class="val pos">€5.800</div></div>
+        </div>
+        <div class="nw-item" onclick="editItem(this, 4050)">
+          <div class="nw-icon amber">🏛️</div>
+          <div><div class="nw-name">Plan de Pensiones</div><div class="nw-desc">Abanca PP Mixto</div></div>
+          <div class="nw-amount"><div class="val pos">€4.050</div></div>
+        </div>
+        <div class="nw-item" onclick="editItem(this, 7000)">
+          <div class="nw-icon green">💵</div>
+          <div><div class="nw-name">Efectivo / Ahorro</div><div class="nw-desc">Fondo de emergencia</div></div>
+          <div class="nw-amount"><div class="val pos">€7.000</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="nw-col-title pasivos">Pasivos</div>
+        <div class="nw-item">
+          <div class="nw-icon red">💳</div>
+          <div><div class="nw-name">Tarjeta de Crédito</div><div class="nw-desc">Saldo pendiente</div></div>
+          <div class="nw-amount"><div class="val neg">−€850</div></div>
+        </div>
+        <div class="nw-item">
+          <div class="nw-icon red">🎓</div>
+          <div><div class="nw-name">Préstamo Personal</div><div class="nw-desc">Vence 2026</div></div>
+          <div class="nw-amount"><div class="val neg">−€3.250</div></div>
+        </div>
+        <div class="nw-item" style="background: rgba(0,229,160,0.04); border-color: rgba(0,229,160,0.15);">
+          <div class="nw-icon green">🔥</div>
+          <div><div class="nw-name">Ratio Activo/Pasivo</div><div class="nw-desc">Excelente posición</div></div>
+          <div class="nw-amount"><div class="val" style="color:var(--green);font-size:18px;font-weight:700">12.8×</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CASHFLOW -->
+  <div id="sec-cashflow" class="section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px">Flujo de Caja</div>
+        <div style="font-size:22px;font-weight:700;color:var(--green)">+€837 <span style="font-size:13px;color:var(--text2);font-weight:400">este mes</span></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+      <div class="chart-card">
+        <div class="chart-title">Gastos por Categoría</div>
+        <div class="chart-sub">Mayo 2025</div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#4f8aff"></span>Ocio 28%</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#ff5c7a"></span>Alimentación 24%</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#a78bfa"></span>Transporte 18%</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#00e5a0"></span>Inversiones 18%</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#f5a623"></span>Otros 12%</span>
+        </div>
+        <div style="position:relative;width:100%;height:150px;">
+          <canvas id="catChart" role="img" aria-label="Dona de gastos por categoría: Ocio 28%, Alimentación 24%, Transporte 18%, Inversiones 18%, Otros 12%">Ocio 28%, Alimentación 24%, Transporte 18%, Inversiones 18%, Otros 12%.</canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Balance Acumulado</div>
+        <div class="chart-sub">Ahorro mensual 2025</div>
+        <div style="position:relative;width:100%;height:175px;">
+          <canvas id="savChart" role="img" aria-label="Gráfico de barras del ahorro mensual acumulado en 2025">Ahorro mensual positivo de enero a mayo 2025.</canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="movements">
+      <div class="mov-header">
+        <div></div><div>Concepto</div><div>Cuenta</div><div style="text-align:right">Importe</div>
+      </div>
+      <div id="mov-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="openModal()" aria-label="Añadir movimiento">+</button>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">Nuevo Movimiento</div>
+    <div class="modal-field">
+      <label class="modal-label">Tipo</label>
+      <div class="type-btns">
+        <button class="type-btn ingreso sel" id="btn-ing" onclick="setType('ingreso')">▲ Ingreso</button>
+        <button class="type-btn gasto" id="btn-gas" onclick="setType('gasto')">▼ Gasto</button>
+      </div>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Importe (€)</label>
+      <input type="number" class="modal-input" id="m-amount" placeholder="0.00">
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <label class="modal-label">Categoría</label>
+        <select class="modal-input" id="m-cat">
+          <option>Nómina</option><option>Ocio</option><option>Alimentación</option>
+          <option>Transporte</option><option>Inversiones</option><option>Suscripciones</option><option>Otros</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Fecha</label>
+        <input type="date" class="modal-input" id="m-date">
+      </div>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Descripción</label>
+      <input type="text" class="modal-input" id="m-desc" placeholder="Ej: Mercadona, Spotify…">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveMovement()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const months = ['Jun','Jul','Ago','Sep','Oct','Nov','Dic','Ene','Feb','Mar','Abr','May'];
+const patrimony = [32000,33400,34100,35800,36500,37200,39000,40100,42300,44500,46100,48250];
+const incomes = [1750,1800,1900,1750,1980,1850,2050,1900,1980,2100,1850,1980];
+const expenses = [1100,1050,1200,950,1300,1100,1400,980,1050,1200,1100,1143];
+
+let movType = 'ingreso';
+const cats = { 'Nómina':'🏢','Ocio':'🎉','Alimentación':'🛒','Transporte':'🚗','Inversiones':'📈','Suscripciones':'📱','Otros':'💡' };
+
+const movements = [
+  {type:'in', icon:'🏢', name:'Nómina Abanca', cat:'Nómina', date:'31 May', account:'Abanca CC', amount:1980},
+  {type:'out', icon:'🛒', name:'Mercadona', cat:'Alimentación', date:'30 May', account:'Abanca CC', amount:-65},
+  {type:'out', icon:'🎉', name:'Restaurante O Marisco', cat:'Ocio', date:'29 May', account:'Visa', amount:-42},
+  {type:'in', icon:'📈', name:'Dividendo Fundsmith', cat:'Inversiones', date:'28 May', account:'Cartera', amount:18},
+  {type:'out', icon:'🚗', name:'Gasolina Repsol', cat:'Transporte', date:'27 May', account:'Visa', amount:-55},
+  {type:'out', icon:'📱', name:'Spotify Premium', cat:'Suscripciones', date:'26 May', account:'Visa', amount:-10},
+  {type:'out', icon:'🛒', name:'Lidl semanal', cat:'Alimentación', date:'25 May', account:'Abanca CC', amount:-48},
+  {type:'out', icon:'🎉', name:'Cine + Palomitas', cat:'Ocio', date:'24 May', account:'Visa', amount:-22},
+  {type:'out', icon:'📈', name:'Amundi MSCI World', cat:'Inversiones', date:'23 May', account:'Cartera', amount:-200},
+  {type:'out', icon:'🚗', name:'Parking aeropuerto', cat:'Transporte', date:'22 May', account:'Visa', amount:-30},
+];
+
+function renderMovements(list) {
+  const el = document.getElementById('mov-list');
+  el.innerHTML = list.map(m => `
+    <div class="mov-row">
+      <div class="mov-cat-icon" style="background:${m.type==='in'?'rgba(0,229,160,0.12)':'rgba(255,92,122,0.1)'}">${m.icon}</div>
+      <div><div class="mov-name">${m.name}</div><div class="mov-date">${m.date} · ${m.cat}</div></div>
+      <div class="mov-account">${m.account}</div>
+      <div class="mov-amount ${m.type==='in'?'in':'out'}">${m.type==='in'?'+':'-'}€${Math.abs(m.amount).toLocaleString('es-ES')}</div>
+    </div>`).join('');
+}
+renderMovements(movements);
+
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'cashflow') { setTimeout(()=>{ if(!window.catChartInst) initCashflowCharts(); }, 50); }
+}
+
+const cfDark = { color: '#8896b3', grid: 'rgba(255,255,255,0.05)' };
+
+Chart.defaults.color = cfDark.color;
+Chart.defaults.font.family = "'SF Pro Display', -apple-system, sans-serif";
+Chart.defaults.font.size = 11;
+
+new Chart(document.getElementById('areaChart'), {
+  type:'line',
+  data:{
+    labels: months,
+    datasets:[{
+      label:'Patrimonio',
+      data: patrimony,
+      fill: true,
+      backgroundColor: 'rgba(79,138,255,0.12)',
+      borderColor: '#4f8aff',
+      borderWidth: 2,
+      pointBackgroundColor: '#4f8aff',
+      pointRadius: 3,
+      pointHoverRadius: 6,
+      tension: 0.4
+    }]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#1a2540', borderColor:'rgba(255,255,255,0.12)', borderWidth:1, callbacks:{ label: c => ' €' + c.parsed.y.toLocaleString('es-ES') } } },
+    scales:{
+      x:{ grid:{color:cfDark.grid}, ticks:{color:cfDark.color} },
+      y:{ grid:{color:cfDark.grid}, ticks:{ color:cfDark.color, callback: v => '€'+Math.round(v/1000)+'k' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('donutChart'), {
+  type:'doughnut',
+  data:{
+    labels:['Fondos','Efectivo','Cripto','Pensión'],
+    datasets:[{ data:[52,28,12,8], backgroundColor:['#4f8aff','#00e5a0','#a78bfa','#f5a623'], borderWidth:0, hoverOffset:6 }]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false, cutout:'68%',
+    plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#1a2540', borderColor:'rgba(255,255,255,0.12)', borderWidth:1, callbacks:{ label: c => ' '+c.label+': '+c.parsed+'%' } } }
+  }
+});
+
+new Chart(document.getElementById('barChart'), {
+  type:'bar',
+  data:{
+    labels: months,
+    datasets:[
+      { label:'Ingresos', data:incomes, backgroundColor:'rgba(0,229,160,0.7)', borderRadius:4, borderSkipped:false },
+      { label:'Gastos', data:expenses, backgroundColor:'rgba(255,92,122,0.6)', borderRadius:4, borderSkipped:false }
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#1a2540', borderColor:'rgba(255,255,255,0.12)', borderWidth:1, callbacks:{ label: c => ' €'+c.parsed.y.toLocaleString('es-ES') } } },
+    scales:{
+      x:{ grid:{display:false}, ticks:{color:cfDark.color} },
+      y:{ grid:{color:cfDark.grid}, ticks:{ color:cfDark.color, callback: v => '€'+v } }
+    }
+  }
+});
+
+function initCashflowCharts() {
+  window.catChartInst = new Chart(document.getElementById('catChart'), {
+    type:'doughnut',
+    data:{ labels:['Ocio','Alimentación','Transporte','Inversiones','Otros'], datasets:[{ data:[28,24,18,18,12], backgroundColor:['#4f8aff','#ff5c7a','#a78bfa','#00e5a0','#f5a623'], borderWidth:0, hoverOffset:6 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'60%', plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#1a2540', borderColor:'rgba(255,255,255,0.12)', borderWidth:1 } } }
+  });
+  new Chart(document.getElementById('savChart'), {
+    type:'bar',
+    data:{
+      labels:['Ene','Feb','Mar','Abr','May'],
+      datasets:[{ label:'Ahorro', data:[750,930,900,750,837], backgroundColor:['rgba(79,138,255,0.6)','rgba(79,138,255,0.6)','rgba(79,138,255,0.6)','rgba(79,138,255,0.6)','rgba(79,138,255,0.85)'], borderRadius:5, borderSkipped:false }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#1a2540', borderColor:'rgba(255,255,255,0.12)', borderWidth:1, callbacks:{ label: c => ' €'+c.parsed.y } } },
+      scales:{ x:{grid:{display:false},ticks:{color:cfDark.color}}, y:{grid:{color:cfDark.grid},ticks:{color:cfDark.color,callback:v=>'€'+v}} }
+    }
+  });
+}
+
+function openModal() {
+  document.getElementById('m-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+function setType(t) {
+  movType = t;
+  document.getElementById('btn-ing').className = 'type-btn ingreso' + (t==='ingreso'?' sel':'');
+  document.getElementById('btn-gas').className = 'type-btn gasto' + (t==='gasto'?' sel':'');
+}
+function saveMovement() {
+  const amt = parseFloat(document.getElementById('m-amount').value);
+  const cat = document.getElementById('m-cat').value;
+  const desc = document.getElementById('m-desc').value || cat;
+  const date = document.getElementById('m-date').value;
+  if (!amt || amt <= 0) return;
+  const d = new Date(date);
+  const dateStr = d.toLocaleDateString('es-ES',{day:'2-digit',month:'short'});
+  movements.unshift({ type: movType==='ingreso'?'in':'out', icon: cats[cat]||'💡', name:desc, cat, date:dateStr, account:'Abanca CC', amount: movType==='ingreso'?amt:-amt });
+  renderMovements(movements);
+  closeModal();
+}
+
+function editItem(el, currentVal) {
+  const newVal = prompt('Nuevo valor (€):', currentVal);
+  if (newVal && !isNaN(newVal)) {
+    const v = parseFloat(newVal);
+    const valEl = el.querySelector('.val.pos');
+    if (valEl) valEl.textContent = '€' + v.toLocaleString('es-ES');
+  }
+}
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
